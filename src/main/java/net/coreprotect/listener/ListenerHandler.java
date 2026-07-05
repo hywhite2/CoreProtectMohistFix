@@ -117,10 +117,24 @@ public final class ListenerHandler {
         pluginManager.registerEvents(new HangingBreakByEntityListener(), plugin);
 
         // Paper Listeners / Fallbacks (Player Listeners)
+        boolean paperChat = false;
+
         try {
-            pluginManager.registerEvents(new PaperChatListener(), plugin);
+            Class.forName("io.papermc.paper.event.player.AsyncChatEvent");
+            paperChat = true;
         }
-        catch (Throwable e) {
+        catch (Throwable ignored) {
+        }
+
+        if (paperChat) {
+            try {
+                pluginManager.registerEvents(new PaperChatListener(), plugin);
+            }
+            catch (Throwable ignored) {
+                pluginManager.registerEvents(new PlayerChatListener(), plugin);
+            }
+        }
+        else {
             pluginManager.registerEvents(new PlayerChatListener(), plugin);
         }
 
