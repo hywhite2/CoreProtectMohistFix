@@ -140,19 +140,25 @@ public final class ListenerHandler {
         pluginManager.registerEvents(new HangingBreakByEntityListener(), plugin);
 
         // Paper Listeners / Fallbacks (Player Listeners)
+        boolean paperChat = false;
+
         try {
-            Class.forName("net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer"); // Paper 1.16+
-            pluginManager.registerEvents(new PaperChatListener(), plugin);
+            Class.forName("io.papermc.paper.event.player.AsyncChatEvent");
+            paperChat = true;
         }
-        catch (Exception e) {
+        catch (Throwable ignored) {
+        }
+
+        if (paperChat) {
+            try {
+                pluginManager.registerEvents(new PaperChatListener(), plugin);
+            }
+            catch (Throwable ignored) {
+                pluginManager.registerEvents(new PlayerChatListener(), plugin);
+            }
+        }
+        else {
             pluginManager.registerEvents(new PlayerChatListener(), plugin);
-        }
-        try {
-            Class.forName("io.papermc.paper.event.player.PlayerFlowerPotManipulateEvent");
-            pluginManager.registerEvents(new FlowerPotManipulateListener(), plugin);
-        }
-        catch (Exception e) {
-            // Ignore registration failures to remain compatible with older servers.
         }
 
         // Player Listeners
